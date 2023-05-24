@@ -1,9 +1,17 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package helloworld;
 option go_package = "./helloworld";
+
 service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+service Messanger {
+  rpc GetMessages (google.protobuf.Empty) returns (stream MessageResponse) {}
+  rpc CreateMessage (MessageRequest) returns (MessageResponse) {}
 }
 
 message HelloRequest {
@@ -11,5 +19,13 @@ message HelloRequest {
 }
 
 message HelloReply {
+  string message = 1;
+}
+
+message MessageRequest {
+  string message = 1;
+}
+
+message MessageResponse {
   string message = 1;
 }

@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -105,5 +106,160 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
+	Metadata: "helloworld.proto",
+}
+
+const (
+	Messanger_GetMessages_FullMethodName   = "/helloworld.Messanger/GetMessages"
+	Messanger_CreateMessage_FullMethodName = "/helloworld.Messanger/CreateMessage"
+)
+
+// MessangerClient is the client API for Messanger service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type MessangerClient interface {
+	GetMessages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Messanger_GetMessagesClient, error)
+	CreateMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error)
+}
+
+type messangerClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewMessangerClient(cc grpc.ClientConnInterface) MessangerClient {
+	return &messangerClient{cc}
+}
+
+func (c *messangerClient) GetMessages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Messanger_GetMessagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Messanger_ServiceDesc.Streams[0], Messanger_GetMessages_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &messangerGetMessagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Messanger_GetMessagesClient interface {
+	Recv() (*MessageResponse, error)
+	grpc.ClientStream
+}
+
+type messangerGetMessagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *messangerGetMessagesClient) Recv() (*MessageResponse, error) {
+	m := new(MessageResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *messangerClient) CreateMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error) {
+	out := new(MessageResponse)
+	err := c.cc.Invoke(ctx, Messanger_CreateMessage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MessangerServer is the server API for Messanger service.
+// All implementations must embed UnimplementedMessangerServer
+// for forward compatibility
+type MessangerServer interface {
+	GetMessages(*emptypb.Empty, Messanger_GetMessagesServer) error
+	CreateMessage(context.Context, *MessageRequest) (*MessageResponse, error)
+	mustEmbedUnimplementedMessangerServer()
+}
+
+// UnimplementedMessangerServer must be embedded to have forward compatible implementations.
+type UnimplementedMessangerServer struct {
+}
+
+func (UnimplementedMessangerServer) GetMessages(*emptypb.Empty, Messanger_GetMessagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+}
+func (UnimplementedMessangerServer) CreateMessage(context.Context, *MessageRequest) (*MessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMessage not implemented")
+}
+func (UnimplementedMessangerServer) mustEmbedUnimplementedMessangerServer() {}
+
+// UnsafeMessangerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MessangerServer will
+// result in compilation errors.
+type UnsafeMessangerServer interface {
+	mustEmbedUnimplementedMessangerServer()
+}
+
+func RegisterMessangerServer(s grpc.ServiceRegistrar, srv MessangerServer) {
+	s.RegisterService(&Messanger_ServiceDesc, srv)
+}
+
+func _Messanger_GetMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MessangerServer).GetMessages(m, &messangerGetMessagesServer{stream})
+}
+
+type Messanger_GetMessagesServer interface {
+	Send(*MessageResponse) error
+	grpc.ServerStream
+}
+
+type messangerGetMessagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *messangerGetMessagesServer) Send(m *MessageResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Messanger_CreateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessangerServer).CreateMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Messanger_CreateMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessangerServer).CreateMessage(ctx, req.(*MessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Messanger_ServiceDesc is the grpc.ServiceDesc for Messanger service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Messanger_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "helloworld.Messanger",
+	HandlerType: (*MessangerServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateMessage",
+			Handler:    _Messanger_CreateMessage_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetMessages",
+			Handler:       _Messanger_GetMessages_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "helloworld.proto",
 }

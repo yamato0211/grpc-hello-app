@@ -13,5 +13,5 @@ mkdir -p ${CLIENT_OUTDIR} ${SERVER_OUTPUT_DIR}
 protoc --proto_path=protocol helloworld.proto \
     --js_out=import_style=commonjs,binary:${CLIENT_OUTDIR} \
     --grpc-web_out=import_style=typescript,mode=grpcwebtext:${CLIENT_OUTDIR} \
-    --go_out=${SERVER_OUTPUT_DIR} \
-    --go-grpc_out=${SERVER_OUTPUT_DIR}
+    --go_out="server" \
+    --go-grpc_out="server"

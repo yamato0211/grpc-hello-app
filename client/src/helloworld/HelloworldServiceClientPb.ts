@@ -17,6 +17,7 @@
 
 import * as grpcWeb from 'grpc-web';
 
+import * as google_protobuf_empty_pb from 'google-protobuf/google/protobuf/empty_pb';
 import * as helloworld_pb from './helloworld_pb';
 
 
@@ -80,6 +81,92 @@ export class GreeterClient {
     request,
     metadata || {},
     this.methodDescriptorSayHello);
+  }
+
+}
+
+export class MessangerClient {
+  client_: grpcWeb.AbstractClientBase;
+  hostname_: string;
+  credentials_: null | { [index: string]: string; };
+  options_: null | { [index: string]: any; };
+
+  constructor (hostname: string,
+               credentials?: null | { [index: string]: string; },
+               options?: null | { [index: string]: any; }) {
+    if (!options) options = {};
+    if (!credentials) credentials = {};
+    options['format'] = 'text';
+
+    this.client_ = new grpcWeb.GrpcWebClientBase(options);
+    this.hostname_ = hostname.replace(/\/+$/, '');
+    this.credentials_ = credentials;
+    this.options_ = options;
+  }
+
+  methodDescriptorGetMessages = new grpcWeb.MethodDescriptor(
+    '/helloworld.Messanger/GetMessages',
+    grpcWeb.MethodType.SERVER_STREAMING,
+    google_protobuf_empty_pb.Empty,
+    helloworld_pb.MessageResponse,
+    (request: google_protobuf_empty_pb.Empty) => {
+      return request.serializeBinary();
+    },
+    helloworld_pb.MessageResponse.deserializeBinary
+  );
+
+  getMessages(
+    request: google_protobuf_empty_pb.Empty,
+    metadata?: grpcWeb.Metadata): grpcWeb.ClientReadableStream<helloworld_pb.MessageResponse> {
+    return this.client_.serverStreaming(
+      this.hostname_ +
+        '/helloworld.Messanger/GetMessages',
+      request,
+      metadata || {},
+      this.methodDescriptorGetMessages);
+  }
+
+  methodDescriptorCreateMessage = new grpcWeb.MethodDescriptor(
+    '/helloworld.Messanger/CreateMessage',
+    grpcWeb.MethodType.UNARY,
+    helloworld_pb.MessageRequest,
+    helloworld_pb.MessageResponse,
+    (request: helloworld_pb.MessageRequest) => {
+      return request.serializeBinary();
+    },
+    helloworld_pb.MessageResponse.deserializeBinary
+  );
+
+  createMessage(
+    request: helloworld_pb.MessageRequest,
+    metadata: grpcWeb.Metadata | null): Promise<helloworld_pb.MessageResponse>;
+
+  createMessage(
+    request: helloworld_pb.MessageRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: helloworld_pb.MessageResponse) => void): grpcWeb.ClientReadableStream<helloworld_pb.MessageResponse>;
+
+  createMessage(
+    request: helloworld_pb.MessageRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: helloworld_pb.MessageResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/helloworld.Messanger/CreateMessage',
+        request,
+        metadata || {},
+        this.methodDescriptorCreateMessage,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/helloworld.Messanger/CreateMessage',
+    request,
+    metadata || {},
+    this.methodDescriptorCreateMessage);
   }
 
 }
